@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+<!--<link rel="stylesheet" href="main.css" />-->
+<meta charset="utf-8">
+
+<style>
+
+    body {
+
+        font: 10px sans-serif;
+
+    }
+
+    .y.axisRight text {
+
+        fill: orange;
+    }
+
+    .y.axisLeft text {
+
+        fill: steelblue;
+    }
+
+    .axis path,
+
+    .axis line {
+
+        fill: none;
+
+        stroke: #000;
+
+        shape-rendering: crispEdges;
+
+    }
+
+    .sales_fill {
+
+        fill: steelblue;
+
+    }
+
+    .profit_fill {
+
+        fill: orange;
+
+    }
+
+    .x.axis path {
+
+        display: none;
+
+    }
+
+</style>
+
+<body>
+    <div class="container">
+        <svg width="600" height="400" id="bar_svg"></svg>
+        <svg width="600" height="400" id="pie_svg"></svg>
+    </div>
+
+   <!-- <div style="margin: 20px">
+        <svg width="600" height="400" id="bar_svg"></svg>
+        <svg width="600" height="400" id="pie_svg"></svg>
+    </div>-->
+</body>
+
+<script src="bower_components/d3/d3.min.js"></script>
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="dataOperator.js"></script>
+<script src="tools.js"></script>
+<script src="drawPic.js"></script>
+
+<script>
+    var bar_svg = d3.select("#bar_svg");
+    var pie_svg = d3.select("#pie_svg");
+
+
+    d3.csv("data/superstore-subset.csv", function(error, data) {
+
+        var currentData = buildByYearTime(data);
+        drawBarview(currentData,bar_svg);
+        drawPieview(currentData,pie_svg);
+    });
+
+</script>

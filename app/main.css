@@ -1,0 +1,46 @@
+text {
+    font: 10px sans-serif;
+    text-anchor: middle;
+}
+.node--hover circle {
+    stroke: #000;
+    stroke-width: 1.2px;
+}
+.label {
+    font-weight: normal;
+    font-size: 20px;
+}
+
+.axis {
+    font: 10px sans-serif;
+}
+
+.axis-title {
+    text-anchor: end;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.axis--x path {
+    display: none;
+}
+
+.axis--y .tick:not(.tick--one) line {
+    stroke-opacity: .15;
+}
+
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+.label-key {
+    font-weight: bold;
+}

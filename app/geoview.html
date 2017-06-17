@@ -1,0 +1,83 @@
+<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"/>
+<link rel="stylesheet" href="main.css"/>
+<script src="bower_components/d3/d3.min.js"></script>
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="dataOperator.js"></script>
+<script src="tools.js"></script>
+<script src="drawPic.js"></script>
+<style>
+
+    .border {
+        fill: none;
+        stroke: #fff;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+    }
+
+    .bubble {
+        /*fill: #7dff51;*/
+        fill: steelblue;
+        fill-opacity: .8;
+        stroke: #fff;
+        stroke-width: .5px;
+    }
+
+    .bubble2 {
+        fill: #FF0000;
+        fill-opacity: .5;
+        stroke: #fff;
+        stroke-width: .5px;
+    }
+
+    .bubble :hover {
+        stroke: #19800f;
+    }
+
+    .legend circle {
+        fill: none;
+        stroke: #ccc;
+    }
+
+    .legend text {
+        fill: #181818;
+        font: 10px sans-serif;
+        text-anchor: middle;
+    }
+
+</style>
+
+<div style="margin: 20px">
+    <svg width="800" height="500" id="geo_svg"></svg>
+</div>
+
+<script>
+    var showType = "sales";
+    var currentData;
+    var source_data;
+    var geo_data;
+    var current_data;
+    var geo_svg = d3.select("#geo_svg");
+    var filterCondition;
+    $(function(){
+        d3.json("data/us-states.json", function (json) {
+            geo_data = json;
+        });
+    })
+
+    function draw(filterCondition,data){
+        if(!geo_data){
+            d3.json("data/us-states.json", function (json) {
+                geo_data = json;
+            });
+        }
+        this.filterCondition = filterCondition;
+        this.filterCondition.filterType.State = "allState";
+        source_data = data;
+        current_data = filterDataBytype(source_data, filterCondition.filterType);
+        currentData = buildGeoData(current_data, geo_data);
+        currentData.features.forEach(function (d) {
+            d.properties.Value = d.properties[filterCondition.category.ShowType];
+        });
+        drawGeoview(currentData, geo_svg);
+    }
+</script>

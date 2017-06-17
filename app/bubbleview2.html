@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="main.css" />
+<body>
+<div style="margin: 20px">
+    <span class="label label-success label1" id="all" onclick="filterData(id,'orderDate',1)">All</span>
+    <span class="label label-default label1" id="2010" onclick="filterData(id,'orderDate',1)">2010</span>
+    <span class="label label-default label1" id="2011" onclick="filterData(id,'orderDate',1)">2011</span>
+    <span class="label label-default label1" id="2012" onclick="filterData(id,'orderDate',1)">2012</span>
+    <span class="label label-default label1" id="2013" onclick="filterData(id,'orderDate',1)">2013</span>
+</div>
+<div>
+    <svg width="960" height="960"><g transform="translate(1,1)"></g></svg>
+</div>
+
+</body>
+</html>
+
+<script src="bower_components/d3/d3.min.js"></script>
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="dataOperator.js"></script>
+<script src="tools.js"></script>
+<script src="drawPic.js"></script>
+<script>
+    var dataSourse = new Array();
+    var dataCorrent = new Array();
+
+    d3.csv("data/superstore-subset.csv", function(error, data) {
+        if (error) throw error;
+
+        dataSourse = data.slice(0);
+        dataCorrent = data.slice(0);
+        dataCorrent = buildByCategory(dataCorrent);
+        drawBubbleView(dataCorrent);
+    });
+
+    var filterType = new Array({type:"orderDate",value:"all"});
+    function filterData(id,type,no){
+        if(no==1){
+            $(".label1").attr({class:"label label-default label1"});
+            $("#"+id).attr({class:"label label-success label1"});
+            filterType[0].type = type;
+            filterType[0].value = id;
+        }
+        dataCorrent = filterDataBytype(dataSourse,filterType);
+        dataCorrent = buildByCategory(dataCorrent);
+        drawBubbleView(dataCorrent);
+    }
+</script>

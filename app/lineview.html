@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+<!--<link rel="stylesheet" href="main.css" />-->
+<style>
+    .axis path,
+
+    .axis line {
+
+        fill: none;
+
+        stroke: black;
+
+        shape-rendering: crispEdges;
+
+    }
+
+    .axis text {
+
+        font-family: sans-serif;
+
+        font-size: 11px;
+
+        fill:#999;
+
+    }
+
+    .inner_line path,
+
+    .inner_line line {
+
+        fill: none;
+
+        stroke:#E7E7E7;
+
+        shape-rendering: crispEdges;
+
+    }
+
+
+    .btn-select {
+        position: relative;
+        display: inline-block;
+        width: 150px;
+        height: 25px;
+        background-color: #5cb85c;
+        font: 14px/20px "Microsoft YaHei";
+        color: #fff;
+    }
+    .opt-select{
+        background-color: #a7a7a7;
+    }
+
+
+</style>
+<body>
+<div class="container-liquid">
+    <div class="row">
+        <div class="col-md-1"  align="right">
+            FILTER
+        </div>
+        <div class="col-md-7">
+            <select id="Year_filter" class="btn-select" >
+                <option value="all" class="opt-select">Year</option>
+                <option value="2010" class="opt-select">2010</option>
+                <option value="2011" class="opt-select">2011</option>
+                <option value="2012" class="opt-select">2012</option>
+                <option value="2013" class="opt-select">2013</option>
+            </select>
+            <select id="Season_filter" class="btn-select" >
+                <option value="all"  class="opt-select">Season</option>
+                <option value="1"  class="opt-select">第一季</option>
+                <option value="2"  class="opt-select">第二季</option>
+                <option value="3"  class="opt-select">第三季</option>
+                <option value="4"  class="opt-select">第四季</option>
+            </select>
+            <select id="Month_filter"  class="btn-select" >
+                <option value="all"  class="opt-select" >Month</option>
+                <option value="1"  class="opt-select" >1月</option>
+                <option value="2 " class="opt-select" >2月</option>
+                <option value="3" class="opt-select" >3月</option>
+                <option value="4" class="opt-select" >4月</option>
+                <option value="5" class="opt-select" >5月</option>
+                <option value="6" class="opt-select" >6月</option>
+                <option value="7" class="opt-select" >7月</option>
+                <option value="8" class="opt-select" >8月</option>
+                <option value="9" class="opt-select" >9月</option>
+                <option value="10" class="opt-select" >10月</option>
+                <option value="11" class="opt-select" >11月</option>
+                <option value="12" class="opt-select" >12月</option>
+            </select>
+            <select id="State"  class="btn-select">
+                <option value="allState"  class="opt-select" >State</option>
+            </select>
+            <select id="City" class="btn-select">
+                <option value="all"  class="opt-select" >City</option>
+            </select>
+            <select id="ProductCategory" class="btn-select">
+                <option value="allProduct" class="opt-select">Product</option>
+                <option value="Technology" class="opt-select">Technology</option>
+                <option value="Furniture" class="opt-select">Furniture</option>
+                <option value="Office" class="opt-select">Office Supplies</option>
+            </select>
+            <select id="ShowType" class="btn-select">
+                <option value="Sales" class="opt-select">Sales</option>
+                <option value="Profit" class="opt-select">Profit</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-1" align="right">
+            CATEGORY
+        </div>
+        <div class="col-md-7">
+            <select id="DateCategory" class="btn-select">
+                <option value="Year" class="opt-select">Year</option>
+                <option value="Season" class="opt-select">Season</option>
+                <option value="Month" class="opt-select">Month</option>
+                <option value="Day" class="opt-select">Day</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-7" id="view1">
+            <div id="line_div" style="margin: 20px">
+            </div>
+        </div>
+        <div class="col-md-5" id="view2">
+            <div id="legend_div" style="margin: 20px">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+<script src="bower_components/d3/d3.min.js"></script>
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="dataOperator.js"></script>
+<script src="tools.js"></script>
+<script src="drawPic.js"></script>
+<script>
+
+  var data_filter;
+  var data_source;
+  var lineData = new Array();
+  var dataSet = new Array();
+  var filterCondition = {"filterType":{"OrderDate":"allDate", "ProductCategory":"allProduct","ProductSubCategory":"allProduct",
+                                            "State":"allState","City":"allCity","Year":"all","Season":"all","Month":"all"},
+                            "category":{"GeoCategory":"State", "ProductCategory":"ProductCategory","DateCateogty":"Year","DateCateogty2":"","ShowType":"Sales"}};
+
+  var dateSet = {"Year":["2010","2011","2012","2013"],"Season":["1","2","3","4"],
+      "Month":["1","2","3","4","5","6","7","8","9","10","11","12"]}
+  lineData.dateSet = dateSet["Year"];
+  lineData.data = dataSet;
+
+  $("#DateCategory").change(function(){
+      var value = jQuery("#DateCategory").val();
+      filterCondition.category.DateCateogty = value;
+      dataSet.length =0;
+      lineData.dateSet = dateSet[value];
+      draw();
+  });
+
+  $("#Year_filter").change(function(){
+      var value = jQuery("#Year_filter").val();
+      filterCondition.filterType.Year = value;
+      filterCondition.category.DateCateogty2 = value+"year";
+      draw();
+  });
+
+  $("#ShowType").change(function(){
+      var value = jQuery("#ShowType").val();
+      filterCondition.category.ShowType = value;
+      draw();
+  });
+
+  $("#Season_filter").change(function(){
+      var value = jQuery("#Season_filter").val();
+      filterCondition.filterType.Season = value;
+      filterCondition.category.DateCateogty2 = value+"season";
+      draw();
+  });
+  $("#Month_filter").change(function(){
+      var value = jQuery("#Month_filter").val();
+      filterCondition.filterType.Month = value;
+      filterCondition.category.DateCateogty2 = value+"month";
+      draw();
+  });
+
+
+
+  $("#State").change(function(){
+      var value = jQuery("#State").val();
+      filterCondition.filterType.State = value;
+      filterCondition.filterType.City = "all";
+      filterCondition.category.GeoCategory = "State";
+      draw();
+      var citys = getOptionSet(data_filter,"City");
+      set_options(citys,"#City");
+  });
+
+  $("#City").change(function(){
+      var value = jQuery("#City").val();
+      filterCondition.filterType.City = value;
+      filterCondition.category.GeoCategory = "City";
+      draw();
+    //  var citys = getOptionSet(data_filter,"City");
+    //  set_options(citys,"#City");
+  });
+
+
+  $("#ProductCategory").change(function(){
+      var value = jQuery("#ProductCategory").val();
+      filterCondition.filterType.ProductCategory = value;
+      filterCondition.category.ProductCategory = "ProductCategory";
+      draw();
+  });
+
+  d3.csv("data/superstore-subset.csv", function(error, data) {
+        if (error) throw error;
+      data_source = data;
+      var states = getOptionSet(data,"State");
+      set_options(states,"#State");
+      draw();
+    });
+
+    function set_options(states,id){
+        $(id).empty();
+        $(id).append("<option value='all' class='opt-select'>"+id.replace("#","")+"</option>");
+        states.forEach(function(d){
+            $(id).append("<option value='"+d+"' class='opt-select'>"+d+"</option>");
+        })
+    }
+
+  function draw(){
+      currentData = buildData();
+      buildDataSet(currentData);
+      d3.select("#line_div").selectAll('*') .remove();
+      d3.select("#legend_div").selectAll('*') .remove();
+      d3.select("#line_div").append("svg").attr("width","1200").attr("height","300");
+      svg = d3.select("svg");
+      drawLineView("#legend_div",lineData,svg);
+  }
+  function buildData(){
+      var label = getLabel();
+      data_filter = filterDataBytype(data_source,filterCondition.filterType);
+      var data = buildByDate(data_filter,filterCondition.category.DateCateogty);
+      data.forEach(function(d){
+          d.value = d[filterCondition.category.ShowType];
+      })
+      return {"label":label,data:data};
+  }
+
+   function getLabel(){
+       var label = filterCondition.category.DateCateogty2+"_"+
+           filterCondition.filterType[filterCondition.category.GeoCategory]+"_"+
+           filterCondition.filterType[filterCondition.category.ProductCategory]+"_"+
+           filterCondition.category.ShowType;
+        label = Trim2(label,"g");
+       return label;
+   }
+
+   function buildDataSet(data){
+       for(i=0;i<dataSet.length;i++){
+           if(dataSet[i].label==data.label) return;
+       }
+       dataSet.push(data);
+       lineData.data = dataSet;
+   }
+
+  </script>

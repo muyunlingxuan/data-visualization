@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+<link rel="stylesheet" href="main.css" />
+<script src="bower_components/d3/d3.min.js"></script>
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="dataOperator.js"></script>
+<script src="tools.js"></script>
+<script src="drawPic.js"></script>
+<style>
+    path {  stroke: #fff; }
+    path:hover {  opacity:0.9; }
+    rect:hover {  fill:blue; }
+    .axis {  font: 10px sans-serif; }
+    .legend tr{    border-bottom:1px solid grey; }
+    .legend tr:first-child{    border-top:1px solid grey; }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .x.axis path {  display: none; }
+    .legend{
+        margin-bottom:76px;
+        display:inline-block;
+        border-collapse: collapse;
+        border-spacing: 0px;
+    }
+    .legend td{
+        padding:4px 5px;
+        vertical-align:bottom;
+    }
+    .legendFreq, .legendPerc{
+        align:right;
+        width:50px;
+    }
+
+     .btn-select {
+         position: relative;
+         display: inline-block;
+         width: 150px;
+         height: 25px;
+         background-color: #5cb85c;
+         font: 14px/20px "Microsoft YaHei";
+         color: #fff;
+     }
+    .opt-select{
+        background-color: #a7a7a7;
+    }
+
+</style>
+
+<select id="State" class="btn-select">
+    <option value='all' class='opt-select'>State</option>
+</select>
+<select id="City" class="btn-select">
+    <option value='all' class='opt-select'>City</option>
+</select>
+<select id="ProductCategory" class="btn-select">
+    <option value="allProduct"  class="opt-select">allProduct</option>
+    <option value="Technology"  class="opt-select">Technology</option>
+    <option value="Furniture"  class="opt-select">Furniture</option>
+    <option value="Office"  class="opt-select">Office Supplies</option>
+</select>
+
+<div id='dashboard'width="960" height="500">
+
+</div>
+<script>
+    var currentData;
+    var source_data;
+    var filterCondition;
+  //  {"filterType":{"OrderDate":"allDate", "ProductCategory":"allProduct","State":"allState"},
+  //      "category":{"GeoCategory":"State", "ProductCategory":"ProductCategory","ShowType":"Sales"}};
+    function update_Geo_option(options,type){
+        if(type=="State"){
+            $("#State").empty();
+            $("#State").append("<option value='all' class='opt-select'>State</option>");
+            options.forEach(function(d){
+                $("#State").append("<option value='"+d+"' class='opt-select'>"+d+"</option>");
+            })
+        }
+        if(type=="City"){
+            $("#City").empty();
+            $("#City").append("<option value='all' class='opt-select'>City</option>");
+            options.forEach(function(d){
+                $("#City").append("<option value='"+d+"' class='opt-select'>"+d+"</option>");
+            })
+        }
+    }
+    /*function update_Proc_option(options,type){
+        if(type=="ProductCategory"){
+            $("#ProductCategory").empty();
+            $("#ProductCategory").append("<option value='allProduct'>allProduct</option>");
+            options.forEach(function(d){
+                $("#ProductCategory").append("<option value='"+d+"'>"+d+"</option>");
+            })
+        }
+    }*/
+
+    $("#State").change(function(){
+        var value = jQuery("#State").val();
+        if(value!="allState"){
+            filterCondition.category.GeoCategory = "City";
+        }else{
+            filterCondition.category.GeoCategory = "State";
+        }
+        filterCondition.filterType.State = jQuery("#State").val();
+        filterCondition.filterType.City = "allCity";
+        draw2();
+    });
+
+    $("#City").change(function(){
+        var value = jQuery("#City").val();
+        if(value!="allCity"){
+            filterCondition.category.GeoCategory = "CustomerID";
+        }else{
+            filterCondition.category.GeoCategory = "City";
+        }
+        filterCondition.filterType.City = jQuery("#City").val();
+        draw2();
+    });
+
+    $("#ProductCategory").change(function(){
+        var value = jQuery("#ProductCategory").val();
+        if(value!="allProduct"){
+            filterCondition.category.ProductCategory = "ProductSubCategory";
+        }else{
+            filterCondition.category.ProductCategory = "ProductCategory";
+        }
+        filterCondition.filterType.ProductCategory = jQuery("#ProductCategory").val();
+        draw2();
+    });
+
+    function draw2(){
+        console.log(filterCondition);
+        currentData = filterDataBytype(source_data,filterCondition.filterType);
+        freqData =  buildForDashboard(currentData,filterCondition.category);
+        dashboard('#dashboard',freqData.data,freqData.productCategorys);
+        update_Geo_option(freqData.geoCategorys,filterCondition.category.GeoCategory);
+        //update_Proc_option(freqData.productCategorys,filterCondition.category.ProductCategory);
+    }
+    function draw(filterCondition,data){
+        this.filterCondition = filterCondition;
+        source_data = data;
+        this.filterCondition = filterCondition;
+        draw2();
+    }
+</script>

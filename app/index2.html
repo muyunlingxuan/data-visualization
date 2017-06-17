@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>data visualization</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="main.css" />
+    <script src="bower_components/d3/d3.min.js"></script>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="dataOperator.js"></script>
+    <script src="tools.js"></script>
+    <script src="drawPic.js"></script>
+    <style>
+        .btn-select {
+            position: relative;
+            display: inline-block;
+            width: 150px;
+            height: 25px;
+            background-color: #5cb85c;
+            font: 14px/20px "Microsoft YaHei";
+            color: #fff;
+        }
+        .opt-select{
+            background-color: #a7a7a7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-liquid">
+        <div class="row"  style="margin-top: 10px;margin-bottom:10px">
+            <div class="col-md-1" align="right">
+                FILTER
+            </div>
+            <div class="col-md-11">
+                <select id="Year_filter" class="btn-select" >
+                    <option value="all" class="opt-select">Year</option>
+                    <option value="2010" class="opt-select">2010</option>
+                    <option value="2011" class="opt-select">2011</option>
+                    <option value="2012" class="opt-select">2012</option>
+                    <option value="2013" class="opt-select">2013</option>
+                </select>
+                <select id="ProductCategory" class="btn-select">
+                    <option value="all" class="opt-select">Product</option>
+                    <option value="Technology" class="opt-select">Technology</option>
+                    <option value="Furniture" class="opt-select">Furniture</option>
+                    <option value="Office" class="opt-select">Office Supplies</option>
+                </select>
+                <select id="ShowType" class="btn-select">
+                    <option value="Sales" class="opt-select">Sales</option>
+                    <option value="Profit" class="opt-select">Profit</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6" id="view1">
+                <iframe src="geoview.html" id="geo_frame" style="WIDTH: 100%; HEIGHT: 550px"></iframe>
+            </div>
+            <div class="col-md-6" id="view2" id="view_frame">
+                <iframe src="pieBarview.html" id="iframe2" style="WIDTH: 100%; HEIGHT: 550px" ></iframe>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12" id="view3">
+                <iframe src="lineview.html" id="line_frame" style="WIDTH: 100%; HEIGHT: 400px"></iframe>
+            </div>
+        </div>
+    </div>
+<input id="geo_state" hidden="true" value="State"/>
+</body>
+</html>
+<script>
+    var source_data;
+    var filterCondition = {"filterType":{"OrderDate":"allDate", "ProductCategory":"allProduct","ProductSubCategory":"allProduct","State":"allState","City":"allCity"},
+                             "category":{"GeoCategory":"State", "ProductCategory":"ProductCategory","ShowType":"Sales"}};
+
+    $("#Year_filter").change(function(){
+        var value = jQuery("#Year_filter").val();
+        filterCondition.filterType.OrderDate = value;
+        filterData(value);
+    });
+
+    $("#ProductCategory").change(function(){
+        var value = jQuery("#ProductCategory").val();
+        filterCondition.filterType.ProductCategory = value;
+        if(value=="all"){
+            filterCondition.category.ProductCategory = "ProductCategory";
+        }else{
+            filterCondition.category.ProductCategory = "ProductSubCategory";
+        }
+        $('#iframe2').contents().find("#ProductCategory")
+            .find("option[value='"+value+"']").attr("selected",true);
+        filterData(value);
+    });
+
+    $("#ShowType").change(function(){
+        var value = jQuery("#ShowType").val();
+        filterCondition.category.ShowType = value;
+        filterData(value);
+    });
+
+
+
+    function filterData(id){
+       // resetLabel(id);
+        filterCondition.category.GeoCategory = "State";
+        filterCondition.filterType.City = "allCity";
+        $("#geo_frame")[0].contentWindow.draw(filterCondition,source_data);
+        $("#iframe2")[0].contentWindow.draw(filterCondition,source_data);
+    }
+
+   function changeDashboard(filterCondition){
+       $('#iframe2').contents().find("#State")
+           .find("option[value='"+filterCondition.filterType.State+"']").attr("selected",true);
+       $("#iframe2")[0].contentWindow.draw(filterCondition,source_data);
+   }
+
+    $(function(){
+        d3.csv("data/superstore-subset.csv", function(data) {
+            this.source_data = data;
+        });
+    })
+    window.onload = function(){
+        $("#geo_frame")[0].contentWindow.draw(filterCondition,source_data);
+        $("#iframe2")[0].contentWindow.draw(filterCondition,source_data);
+    }
+
+
+</script>
+
