@@ -402,3 +402,12 @@ function getOptionSet(data,filter_value,filter_type,col){
     })
     return set;
 }
+
+function  setOption(data,filter_value,filter_type,result_type,id){
+    var options = getOptionSet(data,filter_value,filter_type,result_type);
+    $(id).empty();
+    $(id).append("<option value='all' class='opt-select'>"+result_type+"</option>");
+    options.forEach(function(d){
+        $(id).append("<option value='"+d+"' class='opt-select'>"+d+"</option>");
+    });
+}

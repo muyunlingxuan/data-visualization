@@ -1,8 +1,12 @@
+iframe{
+    border-width: 0px
+}
+
 /*下拉框*/
 .btn-select {
     position: relative;
     display: inline-block;
-    width: 150px;
+    width: 100px;
     height: 25px;
     background-color: #5cb85c;
     font: 14px/20px "Microsoft YaHei";

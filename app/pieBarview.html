@@ -8,143 +8,119 @@
 <script src="tools.js"></script>
 <script src="drawPic.js"></script>
 <style>
-    path {  stroke: #fff; }
-    path:hover {  opacity:0.9; }
-    rect:hover {  fill:blue; }
-    .axis {  font: 10px sans-serif; }
-    .legend tr{    border-bottom:1px solid grey; }
-    .legend tr:first-child{    border-top:1px solid grey; }
-
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-    }
-
-    .x.axis path {  display: none; }
-    .legend{
-        margin-bottom:76px;
-        display:inline-block;
-        border-collapse: collapse;
-        border-spacing: 0px;
-    }
-    .legend td{
-        padding:4px 5px;
-        vertical-align:bottom;
-    }
-    .legendFreq, .legendPerc{
-        align:right;
-        width:50px;
-    }
-
+    body{overflow-x:hidden;}
 </style>
+<body>
+    <div class="container-liquid">
+        <div class="row filterRow">
+            <div class="col-md-1 col-xs-1 " align="right">
+                FILTER
+            </div>
+            <div class="col-md-11 col-xs-11">
+                <select id="State_filter" class="btn-select">
+                    <option value='all' class='opt-select'>State</option>
+                </select>
+                <select id="City_filter" class="btn-select">
+                    <option value='all' class='opt-select'>City</option>
+                </select>
+                <select id="Product_filter" class="btn-select">
+                    <option value="all" class="opt-select">Product</option>
+                    <option value="Technology" class="opt-select">Technology</option>
+                    <option value="Furniture" class="opt-select">Furniture</option>
+                    <option value="Office" class="opt-select">Office Supplies</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 col-xs-2">
+            </div>
+            <div class="col-md-4 col-xs-4">
+                <svg width="200" height="200" id="pie_svg"></svg>
+            </div>
+            <div class="col-md-6 col-xs-6" margin-top="10px">
+                <tabel id="legendP_table" width="300" height="200"></tabel>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 col-xs-12">
+                <svg  width="800" height="300" id="hG_svg"></svg>
+            </div>
+        </div>
 
-<div class="container-liquid">
-    <div class="row filterRow">
-        <div class="col-md-1 col-xs-1" align="right">
-            FILTER
-        </div>
-        <div class="col-md-11 col-xs-11">
-            <select id="State" class="btn-select">
-                <option value='all' class='opt-select'>State</option>
-            </select>
-            <select id="City" class="btn-select">
-                <option value='all' class='opt-select'>City</option>
-            </select>
-            <select id="ProductCategory" class="btn-select">
-                <option value="allProduct"  class="opt-select">allProduct</option>
-                <option value="Technology"  class="opt-select">Technology</option>
-                <option value="Furniture"  class="opt-select">Furniture</option>
-                <option value="Office"  class="opt-select">Office Supplies</option>
-            </select>
-        </div>
     </div>
-    <div class="row">
-        <div id='dashboard' class="col-md-11">
-           <!-- <div id='dashboard'width="960" height="500">
-            </div>-->
-        </div>
-    </div>
-</div>
+</body>
 
 <script>
-    var currentData;
+    var filter_data;
+    var geo_svg = d3.select("#geo_svg");
+    var Condition = {"filterType":{"ProductCategory":"all",
+                                        "State":"all","City":"all",
+                                        "Year":"all"},
+                        "category":{"GeoCategory":"State","ProductCategory":"ProductCategory"},
+                        "ShowType":"Sales"};
+
+    var filter_data;
     var source_data;
-    var filterCondition;
-  //  {"filterType":{"OrderDate":"allDate", "ProductCategory":"allProduct","State":"allState"},
-  //      "category":{"GeoCategory":"State", "ProductCategory":"ProductCategory","ShowType":"Sales"}};
-    function update_Geo_option(options,type){
-        if(type=="State"){
-            $("#State").empty();
-            $("#State").append("<option value='all' class='opt-select'>State</option>");
-            options.forEach(function(d){
-                $("#State").append("<option value='"+d+"' class='opt-select'>"+d+"</option>");
-            })
-        }
-        if(type=="City"){
-            $("#City").empty();
-            $("#City").append("<option value='all' class='opt-select'>City</option>");
-            options.forEach(function(d){
-                $("#City").append("<option value='"+d+"' class='opt-select'>"+d+"</option>");
-            })
-        }
+
+    function resetCondition(condition){
+        Condition.filterType.ProductCategory = condition.filterType.ProductCategory;
+        Condition.filterType.Year = condition.filterType.Year;
+        Condition.filterType.State ="all";
+        Condition.filterType.City = "all";
+        Condition.category.GeoCategory = "State";
+        Condition.category.ProductCategory = condition.filterType.ProductCategory=="all"?"ProductCategory":"ProductSubCategory";
+        Condition.ShowType = condition.ShowType ;
     }
-    /*function update_Proc_option(options,type){
-        if(type=="ProductCategory"){
-            $("#ProductCategory").empty();
-            $("#ProductCategory").append("<option value='allProduct'>allProduct</option>");
-            options.forEach(function(d){
-                $("#ProductCategory").append("<option value='"+d+"'>"+d+"</option>");
-            })
-        }
-    }*/
 
-    $("#State").change(function(){
-        var value = jQuery("#State").val();
-        if(value!="allState"){
-            filterCondition.category.GeoCategory = "City";
+    $("#State_filter").change(function(){
+        var value = jQuery("#State_filter").val();
+        if(value!="all"){
+            Condition.category.GeoCategory = "City";
         }else{
-            filterCondition.category.GeoCategory = "State";
+            Condition.category.GeoCategory = "State";
         }
-        filterCondition.filterType.State = jQuery("#State").val();
-        filterCondition.filterType.City = "allCity";
-        draw2();
+        Condition.filterType.State = value;
+        Condition.filterType.City = "all";
+        window.parent.dashboard_draw();
+        setOption(source_data,value,"State","City","#City_filter");
     });
 
-    $("#City").change(function(){
-        var value = jQuery("#City").val();
-        if(value!="allCity"){
-            filterCondition.category.GeoCategory = "CustomerID";
+    $("#City_filter").change(function(){
+        var value = jQuery("#City_filter").val();
+        if(value!="all"){
+            Condition.category.GeoCategory = "CustomerID";
         }else{
-            filterCondition.category.GeoCategory = "City";
+            Condition.category.GeoCategory = "City";
         }
-        filterCondition.filterType.City = jQuery("#City").val();
-        draw2();
+        Condition.filterType.City = value;
+        window.parent.dashboard_draw();
     });
 
-    $("#ProductCategory").change(function(){
-        var value = jQuery("#ProductCategory").val();
-        if(value!="allProduct"){
-            filterCondition.category.ProductCategory = "ProductSubCategory";
+    $("#Product_filter").change(function(){
+        var value = jQuery("#Product_filter").val();
+        if(value!="all"){
+            Condition.category.ProductCategory = "ProductSubCategory";
         }else{
-            filterCondition.category.ProductCategory = "ProductCategory";
+            Condition.category.ProductCategory = "ProductCategory";
         }
-        filterCondition.filterType.ProductCategory = jQuery("#ProductCategory").val();
-        draw2();
+        Condition.filterType.ProductCategory = value;
+        window.parent.dashboard_draw();
     });
 
-    function draw2(){
-        currentData = filterDataBytype(source_data,filterCondition.filterType);
-        freqData =  buildForDashboard(currentData,filterCondition.category,filterCondition.ShowType);
+    function draw(source_data){
+        this.source_data = source_data;
+        filter_data = filterData(source_data);
+        draw_Dashboard_view(filter_data);
+    }
+
+    function filterData(source_data){
+        return filterDataBytype(source_data, Condition.filterType);
+    }
+
+    function draw_Dashboard_view(filter_data){
+        var freqData =  buildForDashboard(filter_data,Condition.category,Condition.ShowType);
         dashboard('#dashboard',freqData.data,freqData.productCategorys);
-        update_Geo_option(freqData.geoCategorys,filterCondition.category.GeoCategory);
-        //update_Proc_option(freqData.productCategorys,filterCondition.category.ProductCategory);
     }
-    function draw(filterCondition,data){
-        this.filterCondition = filterCondition;
-        source_data = data;
-        this.filterCondition = filterCondition;
-        draw2();
-    }
+
+
 </script>

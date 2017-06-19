@@ -6,45 +6,9 @@
 <script src="tools.js"></script>
 <script src="drawPic.js"></script>
 <style>
-
-    .border {
-        fill: none;
-        stroke: #fff;
-        stroke-linejoin: round;
-        stroke-linecap: round;
-    }
-
-    .bubble {
-        /*fill: #7dff51;*/
-        fill: steelblue;
-        fill-opacity: .8;
-        stroke: #fff;
-        stroke-width: .5px;
-    }
-
-    .bubble2 {
-        fill: #FF0000;
-        fill-opacity: .5;
-        stroke: #fff;
-        stroke-width: .5px;
-    }
-
-    .bubble :hover {
-        stroke: #19800f;
-    }
-
-    .legend circle {
-        fill: none;
-        stroke: #ccc;
-    }
-
-    .legend text {
-        fill: #181818;
-        font: 10px sans-serif;
-        text-anchor: middle;
-    }
-
+    body{overflow:hidden;}
 </style>
+<body>
 <div class="container-liquid">
     <div class="row filterRow">
         <div class="col-md-1 col-xs-1" align="right">
@@ -58,7 +22,7 @@
                 <option value="2012" class="opt-select">2012</option>
                 <option value="2013" class="opt-select">2013</option>
             </select>
-            <select id="ProductCategory" class="btn-select">
+            <select id="Product_filter" class="btn-select">
                 <option value="all" class="opt-select">Product</option>
                 <option value="Technology" class="opt-select">Technology</option>
                 <option value="Furniture" class="opt-select">Furniture</option>
@@ -75,40 +39,40 @@
             <svg width="800" height="500" id="geo_svg"></svg>
         </div>
     </div>
-    <div style="margin: 20px">
-
-    </div>
 </div>
-
+</body>
 
 <script>
-    var showType = "sales";
-    var currentData;
-    var source_data;
-    var geo_data;
-    var current_data;
+    var filter_data;
     var geo_svg = d3.select("#geo_svg");
-    var filterCondition;
-    $(function(){
-        d3.json("data/us-states.json", function (json) {
-            geo_data = json;
-        });
-    })
+    var Condition = {"filterType":{"ProductCategory":"all","Year":"all"},
+                          "ShowType":"Sales"};
 
-    function draw(filterCondition,data){
-        if(!geo_data){
-            d3.json("data/us-states.json", function (json) {
-                geo_data = json;
-            });
-        }
-        this.filterCondition = filterCondition;
-        this.filterCondition.filterType.State = "all";
-        source_data = data;
-        current_data = filterDataBytype(source_data, filterCondition.filterType);
-        currentData = buildGeoData(current_data, geo_data);
-        currentData.features.forEach(function (d) {
-            d.properties.Value = d.properties[filterCondition.category.ShowType];
+    $("#Year_filter").change(function(){
+        var value = jQuery("#Year_filter").val();
+        Condition.filterType.Year = value;
+        window.parent.geo_filter_change(Condition);
+    });
+
+    $("#Product_filter").change(function(){
+        var value = jQuery("#Product_filter").val();
+        Condition.filterType.ProductCategory = value;
+        window.parent.geo_filter_change(Condition);
+    });
+
+    $("#ShowType").change(function(){
+        var value = jQuery("#ShowType").val();
+        Condition.ShowType = value;
+        window.parent.geo_filter_change(Condition);
+
+    });
+
+    function draw(source_data,geo_data){
+        filter_data = filterDataBytype(source_data, Condition.filterType);
+        var current_Geo_Data = buildGeoData(filter_data, geo_data);
+        current_Geo_Data.features.forEach(function (d) {
+            d.properties.Value = d.properties[Condition.ShowType];
         });
-        drawGeoview(currentData, geo_svg);
+        drawGeoview(current_Geo_Data, geo_svg);
     }
 </script>

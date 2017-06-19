@@ -3,48 +3,15 @@
 <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
 <link rel="stylesheet" href="main.css" />
 <style>
-    .axis path,
-
-    .axis line {
-
-        fill: none;
-
-        stroke: black;
-
-        shape-rendering: crispEdges;
-
-    }
-
-    .axis text {
-
-        font-family: sans-serif;
-
-        font-size: 11px;
-
-        fill:#999;
-
-    }
-
-    .inner_line path,
-
-    .inner_line line {
-
-        fill: none;
-
-        stroke:#E7E7E7;
-
-        shape-rendering: crispEdges;
-
-    }
-
+    body{overflow:hidden;}
 </style>
 <body>
 <div class="container-liquid">
-    <div class="row">
-        <div class="col-md-1"  align="right">
+    <div class="row filterRow" >
+        <div class="col-md-1 col-xs-1" align="right">
             FILTER
         </div>
-        <div class="col-md-7">
+        <div class="col-md-11  col-xs-11" >
             <select id="Year_filter" class="btn-select" >
                 <option value="all" class="opt-select">Year</option>
                 <option value="2010" class="opt-select">2010</option>
@@ -74,14 +41,14 @@
                 <option value="11" class="opt-select" >11月</option>
                 <option value="12" class="opt-select" >12月</option>
             </select>
-            <select id="State"  class="btn-select">
-                <option value="allState"  class="opt-select" >State</option>
+            <select id="State_filter"  class="btn-select">
+                <option value="all"  class="opt-select" >State</option>
             </select>
-            <select id="City" class="btn-select">
+            <select id="City_filter" class="btn-select">
                 <option value="all"  class="opt-select" >City</option>
             </select>
-            <select id="ProductCategory" class="btn-select">
-                <option value="allProduct" class="opt-select">Product</option>
+            <select id="Product_filter" class="btn-select">
+                <option value="all" class="opt-select">Product</option>
                 <option value="Technology" class="opt-select">Technology</option>
                 <option value="Furniture" class="opt-select">Furniture</option>
                 <option value="Office" class="opt-select">Office Supplies</option>
@@ -92,12 +59,12 @@
             </select>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-1" align="right">
+    <div class="row filterRow" >
+        <div class="col-md-1 col-xs-1" align="right">
             CATEGORY
         </div>
-        <div class="col-md-7">
-            <select id="DateCategory" class="btn-select">
+        <div class="col-md-11  col-xs-11" >
+            <select id="Date_category" class="btn-select">
                 <option value="Year" class="opt-select">Year</option>
                 <option value="Season" class="opt-select">Season</option>
                 <option value="Month" class="opt-select">Month</option>
@@ -106,13 +73,13 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-7" id="view1">
-            <div id="line_div" style="margin: 20px">
+        <div class="col-md-8 col-xs-8">
+            <div style="margin-left: 50px">
+                <svg width="700" height="400" id="line_svg"></svg>
             </div>
         </div>
-        <div class="col-md-5" id="view2">
-            <div id="legend_div" style="margin: 20px">
-            </div>
+        <div class="col-md-1 col-xs-1">
+            <tabel id="legendL_table" width="100" height="400"></tabel>
         </div>
     </div>
 </div>
@@ -125,134 +92,114 @@
 <script src="tools.js"></script>
 <script src="drawPic.js"></script>
 <script>
+var source_data,
+    filter_data;
 
-  var data_filter;
-  var data_source;
-  var lineData = new Array();
-  var dataSet = new Array();
-  var filterCondition = {"filterType":{"OrderDate":"allDate", "ProductCategory":"allProduct","ProductSubCategory":"allProduct",
-                                            "State":"allState","City":"allCity","Year":"all","Season":"all","Month":"all"},
-                            "category":{"GeoCategory":"State", "ProductCategory":"ProductCategory","DateCateogty":"Year","DateCateogty2":""},
-      "ShowType":"Sales"};
+var line_svg = d3.select("#line_svg");
 
-  var dateCategory = {"Year":["2010","2011","2012","2013"],"Season":["1","2","3","4"],
-      "Month":["1","2","3","4","5","6","7","8","9","10","11","12"]}
-  lineData.dateCategory = dateCategory["Year"];
-  lineData.data = dataSet;
+var Condition = {"filterType":{"ProductCategory":"all",
+                                    "State":"all","City":"all",
+                                    "Year":"all","Season":"all","Month":"all"},
+                    "category":{"DateCateogty":"Year"},
+                    "ShowType":"Sales"};
 
-  $("#DateCategory").change(function(){
-      var value = jQuery("#DateCategory").val();
-      filterCondition.category.DateCateogty = value;
-      dataSet.length =0;
-      lineData.dateCategory = dateCategory[value];
-      draw();
-  });
+var dateSet = {"Year":["2010","2011","2012","2013"],
+    "Season":["1","2","3","4"],
+    "Month":["1","2","3","4","5","6","7","8","9","10","11","12"]};
 
-  $("#Year_filter").change(function(){
-      var value = jQuery("#Year_filter").val();
-      filterCondition.filterType.Year = value;
-      filterCondition.category.DateCateogty2 = value+"year";
-      draw();
-  });
-
-  $("#ShowType").change(function(){
-      var value = jQuery("#ShowType").val();
-      filterCondition.category.ShowType = value;
-      draw();
-  });
-
-  $("#Season_filter").change(function(){
-      var value = jQuery("#Season_filter").val();
-      filterCondition.filterType.Season = value;
-      filterCondition.category.DateCateogty2 = value+"season";
-      draw();
-  });
-  $("#Month_filter").change(function(){
-      var value = jQuery("#Month_filter").val();
-      filterCondition.filterType.Month = value;
-      filterCondition.category.DateCateogty2 = value+"month";
-      draw();
-  });
+var line_data = {"dateCategory":dateSet["Year"],"data":new Array()};
 
 
-
-  $("#State").change(function(){
-      var value = jQuery("#State").val();
-      filterCondition.filterType.State = value;
-      filterCondition.filterType.City = "all";
-      filterCondition.category.GeoCategory = "State";
-      draw();
-      var citys = getOptionSet(data_filter,"City");
-      set_options(citys,"#City");
-  });
-
-  $("#City").change(function(){
-      var value = jQuery("#City").val();
-      filterCondition.filterType.City = value;
-      filterCondition.category.GeoCategory = "City";
-      draw();
-    //  var citys = getOptionSet(data_filter,"City");
-    //  set_options(citys,"#City");
-  });
-
-
-  $("#ProductCategory").change(function(){
-      var value = jQuery("#ProductCategory").val();
-      filterCondition.filterType.ProductCategory = value;
-      filterCondition.category.ProductCategory = "ProductCategory";
-      draw();
-  });
-
-  d3.csv("data/superstore-subset.csv", function(error, data) {
-        if (error) throw error;
-      data_source = data;
-      var states = getOptionSet(data,"State");
-      set_options(states,"#State");
-      draw();
+    $("#Date_category").change(function(){
+        var value = jQuery("#Date_category").val();
+        Condition.category.DateCateogty = value;
+        line_data.data.length = 0;
+        line_data.dateCategory = dateSet[value];
+        window.parent.line_draw();
     });
 
-    function set_options(states,id){
-        $(id).empty();
-        $(id).append("<option value='all' class='opt-select'>"+id.replace("#","")+"</option>");
-        states.forEach(function(d){
-            $(id).append("<option value='"+d+"' class='opt-select'>"+d+"</option>");
+    $("#Year_filter").change(function(){
+        var value = jQuery("#Year_filter").val();
+        Condition.filterType.Year = value;
+        window.parent.line_draw();
+    });
+
+    $("#Season_filter").change(function(){
+        var value = jQuery("#Season_filter").val();
+        Condition.filterType.Season = value;
+        window.parent.line_draw();
+    });
+
+    $("#Month_filter").change(function(){
+        var value = jQuery("#Month_filter").val();
+        Condition.filterType.Month = value;
+        window.parent.line_draw();
+    });
+
+    $("#ShowType").change(function(){
+        var value = jQuery("#ShowType").val();
+        Condition.ShowType = value;
+        window.parent.line_draw();
+    });
+
+
+    $("#State_filter").change(function(){
+        var value = jQuery("#State_filter").val();
+        Condition.filterType.State = value;
+        Condition.filterType.City = "all";
+        window.parent.line_draw();
+        setOption(source_data,value,"State","City","#City_filter");
+    });
+
+    $("#City_filter").change(function(){
+        var value = jQuery("#City_filter").val();
+        Condition.filterType.City = value;
+        window.parent.line_draw();
+    });
+
+
+    $("#Product_filter").change(function(){
+        var value = jQuery("#Product_filter").val();
+        Condition.filterType.ProductCategory = value;
+        window.parent.line_draw();
+    });
+
+    function draw(source_data){
+        this.source_data = source_data;
+        filter_data = filterDataBytype(source_data, Condition.filterType);
+        var data = buildByDate(filter_data,Condition.category.DateCateogty);
+        data.forEach(function(d){
+            d.value = d[Condition.ShowType];
         })
+        addLineData({"label":getLabel(),data:data});
+        drawLineView("#legendL_table",line_svg,line_data);
     }
 
-  function draw(){
-      currentData = buildData();
-      buildDataSet(currentData);
-      d3.select("#line_div").selectAll('*') .remove();
-      d3.select("#legend_div").selectAll('*') .remove();
-      d3.select("#line_div").append("svg").attr("width","1200").attr("height","300");
-      svg = d3.select("svg");
-      drawLineView("#legend_div",lineData,svg);
-  }
-  function buildData(){
-      var label = getLabel();
-      data_filter = filterDataBytype(data_source,filterCondition.filterType);
-      var data = buildByDate(data_filter,filterCondition.category.DateCateogty);
-      data.forEach(function(d){
-          d.value = d[filterCondition.category.ShowType];
-      })
-      return {"label":label,data:data};
-  }
+    function addLineData(data){
+        for(i=0;i<line_data.data.length;i++){
+            if(line_data.data[i].label==data.label) return;
+        }
+        line_data.data.push(data);
+    }
 
-   function getLabel(){
-       var label = filterCondition.category.DateCateogty2+"_"+
-           filterCondition.filterType[filterCondition.category.GeoCategory]+"_"+
-           filterCondition.filterType[filterCondition.category.ProductCategory]+"_"+
-           filterCondition.category.ShowType;
+    function getLabel(){
+        var year = ($("#Year_filter").val()).replace("all","");
+        var season = ($("#Season_filter").val()).replace("all","");
+        var month = ($("#Month_filter").val()).replace("all","");
+        var state = ($("#State_filter").val()).replace("all","");
+        var city = ($("#City_filter").val()).replace("all","");
+        var product = ($("#Product_filter").val()).replace("all","");
+        var showType = ($("#ShowType").val()).replace("all","");
+
+        var label = year!=""?year:"";
+        label += season!=""?"_"+season+"Season":"";
+        label += month!=""?"_"+month:"";
+        label += state!=""?"_"+state:"";
+        label += city!=""?"_"+city:"";
+        label += product!=""?"_"+product:"";
+        label += showType!=""?"_"+showType:"";
         label = Trim2(label,"g");
-       return label;
-   }
-
-   function buildDataSet(data){
-       for(i=0;i<dataSet.length;i++){
-           if(dataSet[i].label==data.label) return;
-       }
-       dataSet.push(data);
-       lineData.data = dataSet;
-   }
+        return label;
+    }
 
   </script>
