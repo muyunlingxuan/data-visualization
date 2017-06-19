@@ -38,37 +38,36 @@
         width:50px;
     }
 
-     .btn-select {
-         position: relative;
-         display: inline-block;
-         width: 150px;
-         height: 25px;
-         background-color: #5cb85c;
-         font: 14px/20px "Microsoft YaHei";
-         color: #fff;
-     }
-    .opt-select{
-        background-color: #a7a7a7;
-    }
-
 </style>
 
-<select id="State" class="btn-select">
-    <option value='all' class='opt-select'>State</option>
-</select>
-<select id="City" class="btn-select">
-    <option value='all' class='opt-select'>City</option>
-</select>
-<select id="ProductCategory" class="btn-select">
-    <option value="allProduct"  class="opt-select">allProduct</option>
-    <option value="Technology"  class="opt-select">Technology</option>
-    <option value="Furniture"  class="opt-select">Furniture</option>
-    <option value="Office"  class="opt-select">Office Supplies</option>
-</select>
-
-<div id='dashboard'width="960" height="500">
-
+<div class="container-liquid">
+    <div class="row filterRow">
+        <div class="col-md-1 col-xs-1" align="right">
+            FILTER
+        </div>
+        <div class="col-md-11 col-xs-11">
+            <select id="State" class="btn-select">
+                <option value='all' class='opt-select'>State</option>
+            </select>
+            <select id="City" class="btn-select">
+                <option value='all' class='opt-select'>City</option>
+            </select>
+            <select id="ProductCategory" class="btn-select">
+                <option value="allProduct"  class="opt-select">allProduct</option>
+                <option value="Technology"  class="opt-select">Technology</option>
+                <option value="Furniture"  class="opt-select">Furniture</option>
+                <option value="Office"  class="opt-select">Office Supplies</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div id='dashboard' class="col-md-11">
+           <!-- <div id='dashboard'width="960" height="500">
+            </div>-->
+        </div>
+    </div>
 </div>
+
 <script>
     var currentData;
     var source_data;
@@ -136,9 +135,8 @@
     });
 
     function draw2(){
-        console.log(filterCondition);
         currentData = filterDataBytype(source_data,filterCondition.filterType);
-        freqData =  buildForDashboard(currentData,filterCondition.category);
+        freqData =  buildForDashboard(currentData,filterCondition.category,filterCondition.ShowType);
         dashboard('#dashboard',freqData.data,freqData.productCategorys);
         update_Geo_option(freqData.geoCategorys,filterCondition.category.GeoCategory);
         //update_Proc_option(freqData.productCategorys,filterCondition.category.ProductCategory);

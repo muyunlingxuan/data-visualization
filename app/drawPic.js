@@ -7,7 +7,7 @@ var height = 0;
 var formatNumber = d3.format(",.0f");
 var formatPercent  = d3.format(",.2%");
 
-function drawBubbleView(dataCorrent){
+/*function drawBubbleView(dataCorrent){
     var svg = d3.select("svg"),
         width = +svg.attr("width"),
         height = +svg.attr("height");
@@ -66,12 +66,16 @@ function drawBubbleView(dataCorrent){
             d3.selectAll(d.ancestors().map(function(d) { return d.node; })).classed("node--hover", hover);
         };
     }
-}
+}*/
 
 
 function drawGeoview(geo_data,svg){
     width = svg.attr("width");
     height = svg.attr("height");
+
+    var color_p = d3.scaleQuantize()
+        .range(["rgb(198,227,244)","rgb(134,181,215)","rgb(165,203,229)","rgb(107,157,196)","rgb(85,134,178)","rgb(66,111,157)","rgb(46,90,135)"]);
+
 
     svg .selectAll('*')
         .remove();
@@ -90,6 +94,16 @@ function drawGeoview(geo_data,svg){
     var radius = d3.scaleSqrt()
         .domain([0, domainMax])
         .range([0, 25]);
+
+    //设置颜色比例尺的定义域
+    var min = d3.min(data, function(d) { return d.properties.Profit; });
+    var max = d3.max(data, function(d) { return d.properties.Profit; });
+    if(min<0){
+        min = 0;
+    }
+    color_p.domain([min,max ]);
+    console.log( d3.min(data, function(d) { return d.properties.Profit; }),
+        d3.max(data, function(d) { return d.properties.Profit; }));
     /*
      sales--圆表示
      */
@@ -104,10 +118,18 @@ function drawGeoview(geo_data,svg){
                 return radius(Math.abs(d.properties.Value));
             })
             .style("fill", function(d) {
+              // /  console.log(d.properties.Profit,color_p(d.properties.Profit));
+                if(Condition.ShowType == "Sales"){
+                    if(d.properties.Profit<0){
+                        return "#ff3c13";
+                    }else {
+                        return color_p(d.properties.Profit);
+                    }
+                }
                 if(d.properties.Value<0)
                     return "#ff3c13";
                 else
-                    return "#7dff51";
+                    return "steelblue";
             })
             .append("title")
             .text(function(d) {
@@ -146,19 +168,24 @@ function drawGeoview(geo_data,svg){
         svg.selectAll(".bubble").remove();
         drawCircle();
     }
-    var zoom = d3.zoom()
-        .scaleExtent([1, 10])
-       // .on("zoom", zoomed);
-    svg.call(zoom);
 
     svg.select(".bubble").selectAll("circle").on("click" , function(d){
-        filterCondition.filterType.State = d.properties.name;
-        filterCondition.category.GeoCategory = "City";
-        window.parent.changeDashboard(filterCondition);
+        Condition.filterType.State = d.properties.name;
+        Condition.category.GeoCategory = "City";
+        draw_Dashboard();
+        $("#State_filter").val(d.properties.name);
+
+        setOption(filter_data,"City");
     })
+    var zoom = d3.zoom()
+        .scaleExtent([1, 10])
+        //.on("zoom", zoomed);
+    svg.call(zoom);
+
+
 }
 
-function drawBarview(data,svg){
+/*function drawBarview(data,svg){
     var margin = {top: 80, right: 80, bottom: 80, left: 80},
 
         width = 600 - margin.left - margin.right,
@@ -298,10 +325,12 @@ function drawBarview(data,svg){
                 + "\nProfit rate " + formatPercent(d.Profit/d.Sales);
         });
 
-}
+}*/
 
 function dashboard(id, fData,keys){
-    $("#dashboard").empty();
+    $("#pie_svg").empty();
+    $("#legendP_table").empty();
+    $("#hG_svg").empty();
     var barColor = 'steelblue';
     //var barColor = '#7dff51';
     var barColor2 = '#FF0000';
@@ -336,14 +365,14 @@ function dashboard(id, fData,keys){
     // function to handle histogram.
     function histoGram(fD){
         var hG={},    hGDim = {t: 60, r: 0, b: 80, l: 40};
-        hGDim.w = 500 - hGDim.l - hGDim.r,
-            hGDim.h = 300 - hGDim.t - hGDim.b;
+        var hGsvg = d3.select("#hG_svg");
+        var w = hGsvg.attr("width");
+        var h = hGsvg.attr("height");
+        hGDim.w = w - hGDim.l - hGDim.r,
+        hGDim.h = h - hGDim.t - hGDim.b;
 
         //create svg for histogram.
-        var hGsvg = d3.select(id).append("svg")
-            .attr("width", hGDim.w + hGDim.l + hGDim.r)
-            .attr("height", hGDim.h + hGDim.t + hGDim.b).append("g")
-            .attr("transform", "translate(" + hGDim.l + "," + hGDim.t + ")");
+        hGsvg .attr("transform", "translate(" + hGDim.l + "," + hGDim.t + ")");
 
         // create function for x-axis mapping.
         var x=d3.scaleBand()// x是序数比例尺
@@ -364,7 +393,7 @@ function dashboard(id, fData,keys){
 
 
         // Create function for y-axis map.
-        var y = d3.scaleLinear().range([hGDim.h, 0])
+        var y = d3.scaleLinear().range([hGDim.h, hGDim.t])
             .domain([0, d3.max(fD, function(d) { return Math.abs(d[1]); })]);
 
         // Create bars for histogram to contain rectangles and freq labels.
@@ -396,10 +425,9 @@ function dashboard(id, fData,keys){
             .attr("x", function(d) { return x(d[0])+x.bandwidth()/2; })
             .attr("y", function(d) { return y(Math.abs(d[1]))-5; })
             .attr("text-anchor", "middle")
+            .attr("font-size", "9")
             .on("mouseover",mouseover)// mouseover is defined below.
             .on("mouseout",mouseout);
-           // .attr("transform", "rotate(-35)");
-
         function mouseover(d){  // utility function to be called on mouseover.
             // filter for selected state.
             var st = fData.filter(function(s){ return s.geoCategory == d[0];})[0],
@@ -443,12 +471,13 @@ function dashboard(id, fData,keys){
 
     // function to handle pieChart.
     function pieChart(pD){
-        var pC ={},    pieDim ={w:250, h: 250};
-        pieDim.r = Math.min(pieDim.w, pieDim.h) / 2;
-
+        var pC ={}, pieDim ={w:250, h: 250};
         // create svg for pie chart.
-        var piesvg = d3.select(id).append("svg")
-            .attr("width", pieDim.w).attr("height", pieDim.h).append("g")
+        var piesvg = d3.select("#pie_svg");
+        pieDim.w = piesvg.attr("width");
+        pieDim.h = piesvg.attr("height");
+        pieDim.r = Math.min(pieDim.w, pieDim.h) / 2;
+        piesvg = piesvg.append("g")
             .attr("transform", "translate("+pieDim.w/2+","+pieDim.h/2+")");
 
         // create function to draw the arcs of the pie slices.
@@ -495,7 +524,7 @@ function dashboard(id, fData,keys){
         var leg = {};
 
         // create table for legend.
-        var legend = d3.select(id).append("table").attr('class','legend');
+        var legend = d3.select("#legendP_table").attr('class','legend');
 
         // create one row per segment.
         var tr = legend.append("tbody").selectAll("tr").data(lD).enter().append("tr");
@@ -551,7 +580,7 @@ function dashboard(id, fData,keys){
 }
 
 
-function drawLine_day(data,svg){
+/*function drawLine_day(data,svg){
     var format = d3.format(",d");
 
     var margin = {top: 30, right: 30, bottom: 40, left: 50};
@@ -596,15 +625,16 @@ function drawLine_day(data,svg){
         .datum(data)
         .attr("class", "line")
         .attr("d", line);
-}
+}*/
 
-function drawLineView(id,lineData,svg){
-
+function drawLineView(id,svg,lineData){
+    d3.select("#line_svg").selectAll('*') .remove();
+    d3.select("#legendL_table").selectAll('*') .remove();
     var margin = {top: 30, right: 50, bottom: 30, left: 60},
         w = +svg.attr("width") - margin.left - margin.right,
         h = +svg.attr("height") - margin.top - margin.bottom,
         padding=40;
-
+    var dataSet = lineData.data;
     var foot_height=margin.bottom;
 
     var head_height=margin.top;
@@ -676,7 +706,7 @@ function drawLineView(id,lineData,svg){
 
          y_domain = { min:dataMin/1.1,max:dataMax*1.1};
 
-         x_domain =  lineData.dateSet;
+         x_domain =  lineData.dateCategory;
 
         //横坐标轴比例尺
 
@@ -910,10 +940,10 @@ function drawLineView(id,lineData,svg){
                .on("mouseover",function() {
                     var label = $(this).attr("class");
 
-                    $("path").css("stroke-opacity","0.3");
+                    $("path").css("stroke-opacity","0.2");
                     $("path."+label).css("stroke-opacity","1");
 
-                    $("circle").css("fill-opacity","0.3");
+                    $("circle").css("fill-opacity","0.2");
                     $("circle."+label).css("fill-opacity","1");
 
                     $("td").css("color","#ccc");
@@ -932,7 +962,7 @@ function drawLineView(id,lineData,svg){
         var leg = {};
 
         // create table for legend.
-        var legend = d3.select(id).append("table").attr('class','legend');
+        var legend = d3.select(id).attr('class','legend');
 
         // create one row per segment.
         var tr = legend.append("tbody").selectAll("tr").data(lD).enter().append("tr");
@@ -950,19 +980,14 @@ function drawLineView(id,lineData,svg){
     }
 
     function removeLine(d){
-       for(var i=0;i<dataSet.length;i++){
-           if(dataSet[i].label == d.label){
+       for(var i=0;i<line_data.data.length;i++){
+           if(line_data.data[i].label == d.label){
                k = i;
            }
         }
         if(k>-1){
-           dataSet.splice(k,1);
+            line_data.data.splice(k,1);
         }
-        d3.select("#line_div").selectAll('*') .remove();
-        d3.select("#legend_div").selectAll('*') .remove();
-        d3.select("#line_div").append("svg").attr("width","1200").attr("height","300");
-        svg = d3.select("svg");
-        lineData.data = dataSet;
-        drawLineView("#legend_div",lineData,svg);
+        drawLineView("#legendL_table",line_svg,line_data);
     }
 }

@@ -45,10 +45,41 @@
     }
 
 </style>
+<div class="container-liquid">
+    <div class="row filterRow">
+        <div class="col-md-1 col-xs-1" align="right">
+            FILTER
+        </div>
+        <div class="col-md-11 col-xs-11">
+            <select id="Year_filter" class="btn-select" >
+                <option value="all" class="opt-select">Year</option>
+                <option value="2010" class="opt-select">2010</option>
+                <option value="2011" class="opt-select">2011</option>
+                <option value="2012" class="opt-select">2012</option>
+                <option value="2013" class="opt-select">2013</option>
+            </select>
+            <select id="ProductCategory" class="btn-select">
+                <option value="all" class="opt-select">Product</option>
+                <option value="Technology" class="opt-select">Technology</option>
+                <option value="Furniture" class="opt-select">Furniture</option>
+                <option value="Office" class="opt-select">Office Supplies</option>
+            </select>
+            <select id="ShowType" class="btn-select">
+                <option value="Sales" class="opt-select">Sales</option>
+                <option value="Profit" class="opt-select">Profit</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <svg width="800" height="500" id="geo_svg"></svg>
+        </div>
+    </div>
+    <div style="margin: 20px">
 
-<div style="margin: 20px">
-    <svg width="800" height="500" id="geo_svg"></svg>
+    </div>
 </div>
+
 
 <script>
     var showType = "sales";
@@ -71,7 +102,7 @@
             });
         }
         this.filterCondition = filterCondition;
-        this.filterCondition.filterType.State = "allState";
+        this.filterCondition.filterType.State = "all";
         source_data = data;
         current_data = filterDataBytype(source_data, filterCondition.filterType);
         currentData = buildGeoData(current_data, geo_data);

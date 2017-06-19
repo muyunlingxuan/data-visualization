@@ -1,3 +1,152 @@
+/*下拉框*/
+.btn-select {
+    position: relative;
+    display: inline-block;
+    width: 150px;
+    height: 25px;
+    background-color: #5cb85c;
+    font: 14px/20px "Microsoft YaHei";
+    color: #fff;
+}
+.opt-select{
+    background-color: #d0ffae;
+    font: 14px/20px "Microsoft YaHei";
+    color: #000;
+}
+
+/*filter行*/
+.filterRow{
+    margin: 5px;
+}
+
+/*geo begin*/
+.border {
+    fill: none;
+    stroke: #fff;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.geo_bubble {
+    /*fill: #7dff51;*/
+    fill: steelblue;
+    fill-opacity: .8;
+    stroke: #fff;
+    stroke-width: .5px;
+}
+
+.geo_bubble2 {
+    fill: #FF0000;
+    fill-opacity: .5;
+    stroke: #fff;
+    stroke-width: .5px;
+}
+
+.bubble :hover {
+    stroke: #19800f;
+}
+/*geo end*/
+
+/*dashboard begin*/
+path {  stroke: #fff; }
+path:hover {  opacity:0.9; }
+rect:hover {  fill:blue; }
+.axis {  font: 10px sans-serif; }
+.legend tr{    border-bottom:1px solid grey; }
+.legend tr:first-child{    border-top:1px solid grey; }
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.x.axis path {  display: none; }
+.legend{
+    margin-top:20px;
+    margin-bottom:76px;
+    display:inline-block;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+.legend td{
+    padding:4px 5px;
+    vertical-align:bottom;
+}
+.legendFreq, .legendPerc{
+    align:right;
+    width:50px;
+}
+/*dashboard begin*/
+
+/*line begin*/
+.axis path,
+
+.axis line {
+
+    fill: none;
+
+    stroke: black;
+
+    shape-rendering: crispEdges;
+
+}
+
+.axis text {
+
+    font-family: sans-serif;
+
+    font-size: 11px;
+
+    fill:#999;
+
+}
+
+.inner_line path,
+
+.inner_line line {
+
+    fill: none;
+
+    stroke:#E7E7E7;
+
+    shape-rendering: crispEdges;
+
+}
+/*line end*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 text {
     font: 10px sans-serif;
     text-anchor: middle;
@@ -43,4 +192,4 @@ text {
 }
 .label-key {
     font-weight: bold;
-}
+}*/

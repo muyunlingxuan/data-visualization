@@ -1,7 +1,7 @@
 /**
  * Created by 000 on 2017/6/9.
  */
-
+//过滤数据
 function filterDataBytype(dataSourse, type) {
     var dataSubset = new Array();
     var dataResult = dataSourse.slice(0);
@@ -90,7 +90,8 @@ function filterDataBytype(dataSourse, type) {
     return dataResult;
 }
 
-function buildByGeo(data) {
+
+/*function buildByGeo(data) {
     var temp = new Array();
     for (var i = 0; i < data.length; i++) {
         data[i].id = "us." + data[i].State + "." + data[i].City + "." + data[i].CustomerName;
@@ -132,8 +133,9 @@ function buildByGeo(data) {
     }
     data.push(root);
     return data;
-}
+}*/
 
+/*地理数据信息*/
 function buildGeoData(data, geo_data) {
     //混合profits数据和GeoJSON
     //循环profits数据集中的每个值
@@ -166,15 +168,16 @@ function buildGeoData(data, geo_data) {
     return geo_data;
 }
 
-function buildForDashboard(data, type) {
+/*仪表盘数据信息*/
+function buildForDashboard(data, categoryType,ShowType) {
     var dataResult = new Array();
     var geoCategorys = new Array();
     var productCategorys = new Array();
 
     data.forEach(function (d) {
         var existProductCategorys = false;
-        var productCategory = d[type.ProductCategory];
-        var geoCategory = d[type.GeoCategory];
+        var productCategory = d[categoryType.ProductCategory];
+        var geoCategory = d[categoryType.GeoCategory];
         var existP = false;
         var existG = false;
         for (i = 0; i < productCategorys.length; i++) {
@@ -198,9 +201,9 @@ function buildForDashboard(data, type) {
     });
 
     data.forEach(function (d) {
-        var geoCategory = d[type.GeoCategory];
-        var productCategory = d[type.ProductCategory];
-        var value = parseFloat(d[type.ShowType])
+        var geoCategory = d[categoryType.GeoCategory];
+        var productCategory = d[categoryType.ProductCategory];
+        var value = parseFloat(d[ShowType])
         var exist = false;
         for (i = 0; i < dataResult.length; i++) {
             if (dataResult[i].geoCategory == geoCategory) {
@@ -217,7 +220,7 @@ function buildForDashboard(data, type) {
             }
             freq[productCategory] = value;
             var geoName = geoCategory;
-            if(type.GeoCategory=="CustomerID"){
+            if(categoryType.GeoCategory=="CustomerID"){
                 geoName = d.CustomerName;
             }
             var temp = {"geoName": geoName,"geoCategory": geoCategory, "freq": freq};
@@ -228,7 +231,6 @@ function buildForDashboard(data, type) {
     result.data = dataResult;
     result.productCategorys = productCategorys;
     result.geoCategorys = geoCategorys;
-    console.log(dataResult);
     return result;
 }
 
@@ -291,7 +293,7 @@ function buildByCategory2(data) {
     return data;
 }
 
-function buildByDailyTime(data) {
+/*function buildByDailyTime(data) {
     var parseDate = d3.timeParse("%Y/%m/%d");
     var dataResult = new Array();
 
@@ -322,7 +324,7 @@ function buildByDailyTime(data) {
     });
 
     return dataResult;
-}
+}*/
 
 function getDateByCategoryType(d,dateCategory){
     if(dateCategory == "Year"){
@@ -373,18 +375,29 @@ function buildByDate(data,dateCategory) {
     return dataResult;
 }
 
-function getOptionSet(data,id){
+
+function getOptionSet(data,filter_value,filter_type,col){
     var set = new Array();
     var exist = false;
-    data.forEach(function(d){
+    var filter_data = new Array();
+    if(filter_type!=""){
+        data.forEach(function(d){
+            if(d[filter_type] == filter_value)
+                filter_data.push(d);
+        })
+    }else{
+        filter_data = data;
+    }
+
+    filter_data.forEach(function(d){
         exist = false;
         for(i=0;i<set.length;i++){
-            if(set[i]==d[id]){
+            if(set[i]==d[col]){
                 exist = true;
             }
         }
         if(!exist){
-            set.push(d[id]);
+            set.push(d[col]);
         }
     })
     return set;

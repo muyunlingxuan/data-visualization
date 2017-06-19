@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-<!--<link rel="stylesheet" href="main.css" />-->
+<link rel="stylesheet" href="main.css" />
 <style>
     .axis path,
 
@@ -36,21 +36,6 @@
         shape-rendering: crispEdges;
 
     }
-
-
-    .btn-select {
-        position: relative;
-        display: inline-block;
-        width: 150px;
-        height: 25px;
-        background-color: #5cb85c;
-        font: 14px/20px "Microsoft YaHei";
-        color: #fff;
-    }
-    .opt-select{
-        background-color: #a7a7a7;
-    }
-
 
 </style>
 <body>
@@ -147,18 +132,19 @@
   var dataSet = new Array();
   var filterCondition = {"filterType":{"OrderDate":"allDate", "ProductCategory":"allProduct","ProductSubCategory":"allProduct",
                                             "State":"allState","City":"allCity","Year":"all","Season":"all","Month":"all"},
-                            "category":{"GeoCategory":"State", "ProductCategory":"ProductCategory","DateCateogty":"Year","DateCateogty2":"","ShowType":"Sales"}};
+                            "category":{"GeoCategory":"State", "ProductCategory":"ProductCategory","DateCateogty":"Year","DateCateogty2":""},
+      "ShowType":"Sales"};
 
-  var dateSet = {"Year":["2010","2011","2012","2013"],"Season":["1","2","3","4"],
+  var dateCategory = {"Year":["2010","2011","2012","2013"],"Season":["1","2","3","4"],
       "Month":["1","2","3","4","5","6","7","8","9","10","11","12"]}
-  lineData.dateSet = dateSet["Year"];
+  lineData.dateCategory = dateCategory["Year"];
   lineData.data = dataSet;
 
   $("#DateCategory").change(function(){
       var value = jQuery("#DateCategory").val();
       filterCondition.category.DateCateogty = value;
       dataSet.length =0;
-      lineData.dateSet = dateSet[value];
+      lineData.dateCategory = dateCategory[value];
       draw();
   });
 
